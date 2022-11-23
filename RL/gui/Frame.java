@@ -157,14 +157,14 @@ public class Frame extends JFrame {
 	private void drawJTableForAutomaton(boolean test) {
 		//This method create JTable witch represent transitions table for our DFA
 		table=new JTable(new MyTableModel(automaton));   
-		 table.setBounds(30,40,200,300);  
-		 table.setRowSelectionAllowed(false);
-		 table.getTableHeader().setBackground(Color.DARK_GRAY);
-	     table.getTableHeader().setForeground(Color.green);
-	     DefaultTableCellRenderer render = new DefaultTableCellRenderer();
-	     render.setBackground(Color.DARK_GRAY);
-	     render.setForeground(Color.green);
-	     table.getColumnModel().getColumn(0).setCellRenderer(render);
+		table.setBounds(30,40,200,300);  
+		table.setRowSelectionAllowed(false);
+		table.getTableHeader().setBackground(Color.DARK_GRAY);
+	    table.getTableHeader().setForeground(Color.green);
+	    DefaultTableCellRenderer render = new DefaultTableCellRenderer();
+	    render.setBackground(Color.DARK_GRAY);
+	    render.setForeground(Color.green);
+	    table.getColumnModel().getColumn(0).setCellRenderer(render);
 	    if(!test) {
 	    	 // MouseListener is use to choose final states by double click on cell. 
 			 table.addMouseListener(new MouseAdapter() {
@@ -233,7 +233,7 @@ public class Frame extends JFrame {
 						buttonPanel.add(inputField,BorderLayout.NORTH);
 					
 					if(executeButton.getText().equals("End of entries")) {
-						mapJTableToDFA(table);
+						mapJTableToAutomaton(table);
 						minimizeButton.setEnabled(true);
 						minimizeButton.setBackground(Color.GREEN);
 						executeButton.setText("EXECUTE "+name);
@@ -254,7 +254,7 @@ public class Frame extends JFrame {
 			}
 		});	 
 		if(test)
-			 mapDFAtoJTable(table);
+			 mapAutomatonToJTable(table);
 	}
 	
 	private boolean checkTable(JTable table, boolean test) {
@@ -280,7 +280,7 @@ public class Frame extends JFrame {
 		return true;
 	}
 	
-	private void mapJTableToDFA(JTable table) {
+	private void mapJTableToAutomaton(JTable table) {
 		 //When user click on button, JTable content is mapping to HashMap transitions of every state. 
 		for(int row=0; row<table.getRowCount(); row++)  											// for each row of JTable/each state of DFA
 			for(int col=1;col<table.getColumnCount(); col++) {										//for each symbol of alphabet
@@ -312,9 +312,13 @@ public class Frame extends JFrame {
 		}
 	}
 	
-	private void mapDFAtoJTable(JTable table) {
-		//This method map transition table of minimized DFA to minimized JTable
+	private void mapAutomatonToJTable(JTable table) {
+		//This method map transition table of minimized DFA(or converted E-NFA to DFA)  to minimized JTable
 		table.setModel(new MyTableModel(automaton));
+		DefaultTableCellRenderer render = new DefaultTableCellRenderer();
+	    render.setBackground(Color.DARK_GRAY);
+	    render.setForeground(Color.green);
+	    table.getColumnModel().getColumn(0).setCellRenderer(render);
 		
 		for(int i=0;i<automaton.getAllStates().size();i++) {
 			int j=1;
@@ -356,7 +360,7 @@ public class Frame extends JFrame {
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					automaton.minimize();
-					mapDFAtoJTable(table);
+					mapAutomatonToJTable(table);
 					minimizeButton.setBackground(Color.lightGray);
 					minimizeButton.setEnabled(false);
 				}
@@ -371,8 +375,7 @@ public class Frame extends JFrame {
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					automaton = automaton.convert();
-					System.out.println("Automaton nakon konverzije ima stanja: "+automaton.ID);
-					mapDFAtoJTable(table);
+					mapAutomatonToJTable(table);
 					setMinimizedButton();
 				}
 			});
@@ -391,7 +394,7 @@ public class Frame extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				automaton.minimize();
-				mapDFAtoJTable(table);
+				mapAutomatonToJTable(table);
 				minimizeButton.setBackground(Color.lightGray);
 				minimizeButton.setEnabled(false);
 			}
@@ -407,6 +410,7 @@ public class Frame extends JFrame {
 	}
 	
 	private void loadSavedDFA() {
+		// This saved DFA is from lecture 2, slide 54
 		int numberOfStates = 11;
 		int startStateID=0;
 		ArrayList<Integer> finalStatesID=new ArrayList<>(Arrays.asList (1,4,8));
@@ -488,7 +492,7 @@ public class Frame extends JFrame {
 	}
 	
 	private void loadSavedNFA(int a) {
-		// This saved e-NFA is from lecture 3, slide 38
+		// This saved e-NFA is from lecture 3, slide 37
 		int numberOfStates = 6;
 		int startStateID=0;
 		ArrayList<Integer> finalStatesID=new ArrayList<>(Arrays.asList (5));

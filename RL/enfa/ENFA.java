@@ -23,9 +23,12 @@ public class ENFA extends Automaton {
 		
 	}
 	
-	private void epsilonClosure () {
-		// Bilo bi dobro da napravimo novi nfa automat. Novi automat nece imati nova stanja, nego samo nove prelaze, bez epsilon. Alfabet takodje nece biti isti,
-		// nece imati epsilon. Moze doci jedino do promjene u broju finalnih stanja
+	private void newTransitionFunction () {
+							// 	CONVERTING E-NFA to regular NFA
+		// First, make new NFA without epsilon transitions. The new NFA will have same number of states with same names. Things that will be change:
+		// alphabet (new nfa will have new alphabet, without epsilon symbol);
+		// new transition function (without epsilon transitions);
+		// set of final states could change, if epsilon closure of some state contains state from final set.
 		novi=new ENFA();
 		novi.setAlphabet(this.alphabet);
 		int indeks = novi.alphabet.indexOf(epsilon);
@@ -36,41 +39,40 @@ public class ENFA extends Automaton {
 			novi.states.add(new State(Integer.parseInt(state.getID())));
 		}
 		novi.setStartStateByID(this.startState.getID());
-		//1. korak
-		// Za svako stanje pronadji epsilon zatvorenje. Svako stanje se prosljedjuje kao skup preklopljenom metodu epsilonClosure
+								// Start converting...
 		HashSet<State> set= new HashSet<>();
 		for (State state : this.states) {
+			//1. korak
+			// Za svako stanje pronadji epsilon zatvorenje. Svako stanje se prosljedjuje kao skup metodu epsilonClosure
 			set=epsilonClosure(new HashSet<>(Arrays.asList(state)));
 			//System.out.println("Za epsilon iz stanja "+state+" smo zavrsili u skupu: "+ set);
-			// Ovdje dodaj provjeru za finalna stanja
-			for (State state2 : set) {
+			for (State state2 : set) {  // check if new state should be final state
 				if(this.finalStates.contains(state2))
 					newFinalStates.add(state2);
 			}
 			secondStep(state, set);
 		}	
-		for (State state : newFinalStates) {
+		for (State state : newFinalStates) {		//making new final set of new automaton
 			novi.setFinalState(state.getID());
 		}
-//		System.out.println("=====================");
-//		System.out.println("enfa nakon konverzije u nfa");
-//		novi.print();
-		
+		// Copy new NFA to old instance of epsilon NFA
 		this.states.clear();
 		this.setAllStates(novi.states);
 		this.startState=novi.startState;
 		this.finalStates.clear();
 		this.setFinalStates(novi.finalStates);
 		this.alphabet=novi.alphabet;
+				// Conversion is over!
 		System.out.println("=====================");
-		System.out.println("drugi ispis");
+		System.out.println("NFA without ε transitions");
 		this.print();
-		System.out.println("finalna stanja su "+this.finalStates);
-		System.out.println("Alfabet je "+this.alphabet);
-		System.out.println("=====================");
+		System.out.println("Final states of new NFA are: "+this.finalStates);
+		System.out.println("Alphabet is: "+this.alphabet);
+		System.out.println("=====================\n");
 	}	
 	
-	private HashSet<State> epsilonClosure (HashSet<State> currentStates) {
+	public HashSet<State> epsilonClosure (HashSet<State> currentStates) {
+		// This method will find e-closure for parameter currentStates, and returns e-closure as set
 		// Primijeni osnovnu funkciju prelaza deltaFunction za epsilon, ona uzima skup stanja i za svako stanje gleda kud ce otici sa epsilon
 		HashSet<State> nextStates = deltaFunction(currentStates, epsilon);
 		// Ako nema epsilon prelaza, vratice proslijedjeni skup, tj. u njemu ce biti samo jedno stanje
@@ -92,27 +94,27 @@ public class ENFA extends Automaton {
 		//kuda ce otici sa njima.
 		for (char sym : novi.alphabet) {
 			//Za svaki simbol alfabeta, osim epsilon, treba da vidimo kuda nas vodi osnovna funkcija prelaza
-			HashSet<State> newSet= new HashSet<>();
-			newSet=deltaFunction(set, sym);
+			HashSet<State> nextStates= new HashSet<>();
+			nextStates=deltaFunction(set, sym);
 			//System.out.println("Skup stanja nakon drugog koraka: "+newSet);
-			//3. korak
-			//Na dobijeni skup, opet treba primijeniti epsilon zatvorenje. To ce biti nova funkcija prelaza za taj simbol.
-			newSet=epsilonClosure(newSet);
+		//3. korak
+		//Na dobijeni skup, opet treba primijeniti epsilon zatvorenje. To ce biti nova funkcija prelaza za taj simbol.
+			nextStates=epsilonClosure(nextStates);
 			//System.out.println("Konacno, epsilon closure stanja "+state+" za simbol "+sym+" je skup: "+newSet);
 			// U novo stanje novog automata dodajem nove tranzicije
-			HashSet<State> newSet1=new HashSet<>();
-			for (State state2 : newSet) {
-				newSet1.add(novi.getStateByID(state2.getID()));
+			HashSet<State> newSet=new HashSet<>();
+			for (State state2 : nextStates) {
+				newSet.add(novi.getStateByID(state2.getID()));
 			}
-			newState.addTransition(sym, newSet1);
+			newState.addTransition(sym, newSet);
 		}
 	}
 	
 	public DFA convert() {
 		if(this.alphabet.contains(epsilon)) {
-			epsilonClosure();
+			newTransitionFunction();
 		}
-		// Za sada samo konvertuje nfa u dfa
+
 		dfa=new DFA();
 		// pocetno stanje nfa i dfa ce biti isto, kao i alfabet
 		dfa.getAllStates().add(startState);

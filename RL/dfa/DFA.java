@@ -100,7 +100,7 @@ public class DFA extends Automaton {
         		newStates.add(ss);
         	}
         }
-        if(!unmarkedPairs.isEmpty()) {
+        if(!newStates.isEmpty()) {
         	System.out.println("Od ovih skupova stanja (to su skupovi ekvivalentnih STANJA) treba da napravim jedno novo stanje: ");
             newStates.stream().forEach(System.out::println);
             newStates.stream().forEach(s -> s.makeNewStateFromEquivalent(this));
@@ -109,5 +109,9 @@ public class DFA extends Automaton {
 	
 	public DFA convert() {
 		return null;
+	}
+	
+	public HashSet<State> epsilonClosure (HashSet<State> currentStates) {
+		return currentStates;
 	}
 }

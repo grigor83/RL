@@ -112,10 +112,11 @@ public abstract class Automaton {
 			//Rekurzija se odmotava i pocinje izvrsavanje algoritma. 
 			//U tom slucaju, vratice pocetno stanje(tj. skup stanja jer sam tako implementirao) i proslijedice mu prvi znak u ulaznom stringu. 
 		if(sign==null)
-			return currentStates;
+			return epsilonClosure(currentStates);
 			//U svim ostalim slucajevima, prosirena funkcija prelaza ce vratiti skup stanja koja su dobijena prethodnim pozivom rekurzije i na njih ce primijeniti
 			//osnovnu funkciju sa trenutnim znakom inputa. 
-		return deltaFunction(deltaFunction(currentStates, stack), sign);
+		//currentStates=epsilonClosure(currentStates);
+		return epsilonClosure(deltaFunction(deltaFunction(currentStates, stack), sign));
 	}
 											// OSNOVNA FUNKCIJA PRELAZA
 		// IF simulira situaciju kad je prethodni poziv prosirene funkcije vratio prazan skup i tada nema smisla primjenjivati osnovnu funkciju prelaza za 
@@ -134,7 +135,11 @@ public abstract class Automaton {
 				nextStates.addAll(state.move(sign));
 			//In case DFA, nextStates will be always one element and never will be null. 
 			//In case NFA, may be one state, multiple states or null (empty set).
-		return nextStates;
+//		return nextStates;
+		if(nextStates.size()==0)
+			return nextStates;
+		else
+			return epsilonClosure(nextStates);
 	}
 	
 	public void print() {
@@ -144,5 +149,7 @@ public abstract class Automaton {
 	public abstract void minimize();
 		
 	public abstract DFA convert();
+	
+	public abstract HashSet<State> epsilonClosure (HashSet<State> set);
 	
 }
