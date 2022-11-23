@@ -21,7 +21,7 @@ public class StateSet {
 		equivalentStates.add(pair.getSecondState());
 	}
 	
-	public State makeNewState(Automaton automaton){
+	public State makeNewStateFromEquivalent(Automaton automaton){
 		if(equivalentStates.isEmpty())
 			return null;
 		System.out.println("pravim novo stanje od ovih: "+equivalentStates.toString());

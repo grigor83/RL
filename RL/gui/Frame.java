@@ -115,6 +115,8 @@ public class Frame extends JFrame {
 			alphabet.add(string.charAt(0));
 		}
 		automaton.setAlphabet(alphabet);
+		if(automaton instanceof ENFA)
+			automaton.getAlphabet().add(ENFA.epsilon);
 		// Final state(s) will be choose using GUI, after creating DFA.
 		drawAutomatonFrame(false);
 	}
@@ -238,11 +240,12 @@ public class Frame extends JFrame {
 					}
 					else {
 						String input=inputField.getText();
-						if(automaton.execute(input)) {
+						HashSet<State> result = automaton.execute(automaton.getStartState(), input);
+						if(automaton.machineAcceptInput(result)) {
 							inputField.setText("  String "+input+" is accepted!");
 							inputField.setBackground(Color.green);
 						}
-						else{
+						else {
 							inputField.setText("  String "+input+" is not accepted!");
 							inputField.setBackground(Color.red);
 						}
@@ -400,7 +403,7 @@ public class Frame extends JFrame {
 		if(machine.equals("DFA"))
 			loadSavedDFA();
 		else
-			loadSavedNFA();
+			loadSavedNFA(1);
 	}
 	
 	private void loadSavedDFA() {
@@ -449,7 +452,7 @@ public class Frame extends JFrame {
 	}
 	
 	private void loadSavedNFA() {
-		// This saved NFA is from lecture 3, slide 38
+		// This saved NFA (regular NFA,without e-transitions) is from lecture 3, slide 38
 		int numberOfStates = 6;
 		int startStateID=0;
 		ArrayList<Integer> finalStatesID=new ArrayList<>(Arrays.asList (5));
@@ -480,6 +483,48 @@ public class Frame extends JFrame {
 		nfa.getStateByID(4+"").addAllTransitions(nfa, 'b', new ArrayList<>(Arrays.asList ("3")));
 		nfa.getStateByID(5+"").addAllTransitions(nfa, 'a', new ArrayList<>(Arrays.asList ("null")));
 		nfa.getStateByID(5+"").addAllTransitions(nfa, 'b', new ArrayList<>(Arrays.asList ("null")));
+		automaton=nfa;
+		drawAutomatonFrame(true);
+	}
+	
+	private void loadSavedNFA(int a) {
+		// This saved e-NFA is from lecture 3, slide 38
+		int numberOfStates = 6;
+		int startStateID=0;
+		ArrayList<Integer> finalStatesID=new ArrayList<>(Arrays.asList (5));
+		ArrayList<Character> alphabet = new ArrayList<>(Arrays.asList('a','b', ENFA.epsilon));
+		
+		ENFA nfa;
+		nfa=new ENFA();
+		ArrayList<State> states=new ArrayList<>();
+		for(int i=0; i<numberOfStates;i++)
+			states.add(new State(nfa.ID++));
+		nfa.setAllStates(states);
+		nfa.setStartStateByID(startStateID+"");
+		nfa.setAlphabet(alphabet);
+		HashSet<State> finalStates=new HashSet<>();
+		for (Integer id : finalStatesID) {
+			finalStates.add(nfa.getStateByID(id+""));
+		}
+		nfa.setFinalStates(finalStates);
+		nfa.getStateByID(0+"").addAllTransitions(nfa, 'a', new ArrayList<>(Arrays.asList ("1")));
+		nfa.getStateByID(0+"").addAllTransitions(nfa, 'b', new ArrayList<>(Arrays.asList ("0")));
+		nfa.getStateByID(0+"").addAllTransitions(nfa, ENFA.epsilon, new ArrayList<>(Arrays.asList ("null")));
+		nfa.getStateByID(1+"").addAllTransitions(nfa, 'a', new ArrayList<>(Arrays.asList ("null")));
+		nfa.getStateByID(1+"").addAllTransitions(nfa, 'b', new ArrayList<>(Arrays.asList ("1")));
+		nfa.getStateByID(1+"").addAllTransitions(nfa, ENFA.epsilon, new ArrayList<>(Arrays.asList ("2,4")));
+		nfa.getStateByID(2+"").addAllTransitions(nfa, 'a', new ArrayList<>(Arrays.asList ("2")));
+		nfa.getStateByID(2+"").addAllTransitions(nfa, 'b', new ArrayList<>(Arrays.asList ("5")));
+		nfa.getStateByID(2+"").addAllTransitions(nfa, ENFA.epsilon, new ArrayList<>(Arrays.asList ("null")));
+		nfa.getStateByID(3+"").addAllTransitions(nfa, 'a', new ArrayList<>(Arrays.asList ("4")));
+		nfa.getStateByID(3+"").addAllTransitions(nfa, 'b', new ArrayList<>(Arrays.asList ("null")));
+		nfa.getStateByID(3+"").addAllTransitions(nfa, ENFA.epsilon, new ArrayList<>(Arrays.asList ("null")));
+		nfa.getStateByID(4+"").addAllTransitions(nfa, 'a', new ArrayList<>(Arrays.asList ("5")));
+		nfa.getStateByID(4+"").addAllTransitions(nfa, 'b', new ArrayList<>(Arrays.asList ("3")));
+		nfa.getStateByID(4+"").addAllTransitions(nfa, ENFA.epsilon, new ArrayList<>(Arrays.asList ("null")));
+		nfa.getStateByID(5+"").addAllTransitions(nfa, 'a', new ArrayList<>(Arrays.asList ("null")));
+		nfa.getStateByID(5+"").addAllTransitions(nfa, 'b', new ArrayList<>(Arrays.asList ("null")));
+		nfa.getStateByID(5+"").addAllTransitions(nfa, ENFA.epsilon, new ArrayList<>(Arrays.asList ("null")));
 		automaton=nfa;
 		drawAutomatonFrame(true);
 	}

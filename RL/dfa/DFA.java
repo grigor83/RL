@@ -103,7 +103,7 @@ public class DFA extends Automaton {
         if(!unmarkedPairs.isEmpty()) {
         	System.out.println("Od ovih skupova stanja (to su skupovi ekvivalentnih STANJA) treba da napravim jedno novo stanje: ");
             newStates.stream().forEach(System.out::println);
-            newStates.stream().forEach(s -> s.makeNewState(this));
+            newStates.stream().forEach(s -> s.makeNewStateFromEquivalent(this));
         }
 	}	
 	

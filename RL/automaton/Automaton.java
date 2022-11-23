@@ -89,7 +89,7 @@ public abstract class Automaton {
 			return true;
 	}
 	
-	public boolean execute(String input) {
+	public HashSet<State> execute(State currentState, String input) {
 		//Stack is holding input string, last character is on top of stack
 		Deque<Character> stack = new ArrayDeque<>();
 		for (Character sign : input.toCharArray()) 
@@ -97,15 +97,15 @@ public abstract class Automaton {
 		//Prosirena funkcija prelaza se startuje sa inicijalnim stanjem i stekom na kome se nalazi cijeli ulazni string.
 		//Startno stanje se prosljedjuje kao skup HashSet
 		HashSet<State> temp= new HashSet<>();
-		temp.add(startState);
-		HashSet<State> result= delta_function(temp, stack);
-		return machineAcceptInput(result);
+		temp.add(currentState);
+		HashSet<State> result= deltaFunction(temp, stack);
+		return result;
 	}
 	
 														// PROSIRENA FUNKCIJA PRELAZA 
 		// Potpuno ista implementacija i za NFA i DFA, jedina razlika je sto ce u slucaju DFA skup currentStates imati samo jedan element i sto skup
 		// vracen prethodnim pozivom funkcije nece biti prazan. Prazan skup ce biti vracen samo kod NFA, kad za odredjeni simbol ne postoji prelaz u novo stanje.
-	public HashSet<State> delta_function(HashSet<State> currentStates,Deque<Character> stack){
+	public HashSet<State> deltaFunction(HashSet<State> currentStates,Deque<Character> stack){
 			//U svakoj rekurziji se skida karakter sa steka, sve dok se ne dodje do dna steka, tj. do prvog slova u stringu.
 		Character sign=stack.poll();
 			//If naredba je uslov za prekid rekurzije i to znaci da smo dosli do dna steka(stek je prazan i string je procitan do kraja).
@@ -115,14 +115,14 @@ public abstract class Automaton {
 			return currentStates;
 			//U svim ostalim slucajevima, prosirena funkcija prelaza ce vratiti skup stanja koja su dobijena prethodnim pozivom rekurzije i na njih ce primijeniti
 			//osnovnu funkciju sa trenutnim znakom inputa. 
-		return delta_function(delta_function(currentStates, stack), sign);
+		return deltaFunction(deltaFunction(currentStates, stack), sign);
 	}
 											// OSNOVNA FUNKCIJA PRELAZA
 		// IF simulira situaciju kad je prethodni poziv prosirene funkcije vratio prazan skup i tada nema smisla primjenjivati osnovnu funkciju prelaza za 
 		// proslijedjeni simbol. Varijabla currentStates predstavlja skup stanja u koja smo stigli prethodnim pozivima prosirene finkcije.
 		// U slucaju DFA, to ce uvijek biti samo jedan element, dok u slucaju NFA to moze biti i skup stanja ili null, jer NFA za isti simbol moze preci u 
 		// vise stanja, a ne mora preci ni u jedno. 
-	public HashSet<State> delta_function(HashSet<State> currentStates, char sign){
+	public HashSet<State> deltaFunction(HashSet<State> currentStates, char sign){
 		System.out.println("Na skup stanja "+currentStates+" primjenjujem osn. funkciju prelaza za simbol: "+sign);
 		if(currentStates==null)
 			return null;
