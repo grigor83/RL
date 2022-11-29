@@ -15,6 +15,7 @@ public abstract class Automaton {
 	protected State startState;
 	protected HashSet<State> finalStates;
 	protected ArrayList<Character> alphabet; 
+	private String createdFromRegex;
 	
 	public Automaton() {
 		states=new ArrayList<>();
@@ -74,6 +75,14 @@ public abstract class Automaton {
 	
 	public ArrayList<Character> getAlphabet(){
 		return alphabet;
+	}
+	
+	public String getFromRegex() {
+		return createdFromRegex;
+	}
+	
+	public void setFromRegex(String s) {
+		createdFromRegex=s;
 	}
 	
 	public boolean machineAcceptInput(HashSet<State> states) {

@@ -10,7 +10,7 @@ import java.util.LinkedList;
 import automaton.Automaton;
 
 public class DFA extends Automaton {
-	
+		
 	public void minimize() {
         //Remove unreachable states
 		Deque<State> stack = new ArrayDeque<>();

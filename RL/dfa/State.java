@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
 
 import automaton.Automaton;
 
@@ -11,6 +12,8 @@ public class State implements Comparable<State> {
 	private String id;
 	// Keys are symbols of alphabet, values are sets of next states
 	private HashMap<Character, HashSet<State>> transitions;
+	private Set<Integer> name;
+	private boolean marked, acceptable;
 	
 	public State(int id) {
 		this.id=id+"";
@@ -49,6 +52,7 @@ public class State implements Comparable<State> {
 		System.out.println("ID: "+id);
 		transitions.entrySet().stream()
 										.forEach(System.out::println);
+		System.out.println(" acceptable = "+acceptable);
 	}
 	
 	public void changeTransitions(Automaton automaton, State newState) {
@@ -104,5 +108,37 @@ public class State implements Comparable<State> {
 	@Override
 	public int compareTo(State o) {
 		return this.id.compareTo(o.id);
+	}
+	
+	public Set<Integer> getName() {
+		return name;
+	}
+
+	public void setName(Set<Integer> name) {
+		this.name = name;
+	}
+
+	public HashMap<Character, HashSet<State>> getTransitions() {
+		return transitions;
+	}
+
+	public void setTransitions(HashMap<Character, HashSet<State>> transitions) {
+		this.transitions = transitions;
+	}
+
+	public boolean isMarked() {
+		return marked;
+	}
+
+	public void setMarked(boolean marked) {
+		this.marked = marked;
+	}
+	
+	public boolean isAcceptable() {
+		return acceptable;
+	}
+	
+	public void setAcceptable(boolean accept) {
+		acceptable=accept;
 	}
 }

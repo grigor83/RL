@@ -31,6 +31,7 @@ import automaton.Automaton;
 import dfa.DFA;
 import dfa.State;
 import enfa.ENFA;
+import regex_to_dfa.RegexToDFA;
 
 
 public class Frame extends JFrame {
@@ -63,13 +64,40 @@ public class Frame extends JFrame {
 	    		break;
 	    	case 1: menu("e-NFA");
 				break;
-	    	case 2: menu("RE");;
+	    	case 2: menu();
 				break;
 	    }
 	}
 	
+	private void menu() {
+		String[] options = {"Execute regex ", "Test saved regex"};
+		JList<String> list=new JList<>(options);
+	    JOptionPane.showMessageDialog(null, list, "Choose option", JOptionPane.PLAIN_MESSAGE);
+	    int index= list.getSelectedIndex();
+	    if(index==-1)
+	    	System.exit(1);
+	    
+	    switch(index) {
+	    	case 0: String regex = JOptionPane.showInputDialog("Enter regular expresion:");
+	    			convertRegexToDFA(regex);
+	    			break;
+	    	case 1: loadSavedRegex();
+					break;
+	    }
+	}
+
+	private void convertRegexToDFA(String regex) {
+		automaton = RegexToDFA.convert(automaton, regex.trim());
+		drawAutomatonFrame(true);
+		minimizeButton.hide();
+	}
+	
+	private void loadSavedRegex() {
+		
+	}
+
 	private void menu(String machine) {
-		String[] options = {"Create "+machine, "Generate "+machine+" from regular exspresion", "Test saved "+machine};
+		String[] options = {"Create "+machine, "Test saved "+machine};
 		JList<String> list=new JList<>(options);
 	    JOptionPane.showMessageDialog(null, list, "Choose option", JOptionPane.PLAIN_MESSAGE);
 	    int index= list.getSelectedIndex();
@@ -79,9 +107,7 @@ public class Frame extends JFrame {
 	    switch(index) {
 	    	case 0: loadDataGUI(machine);
 	    		break;
-	    	case 1: generateDFA();
-				break;
-	    	case 2: loadSavedAutomaton(machine);
+	    	case 1: loadSavedAutomaton(machine);
 				break;
 	    }
 	}
@@ -227,8 +253,9 @@ public class Frame extends JFrame {
 					else
 						name="E_NFA";
 					table.setEnabled(false);		// Once table is created, meaning DFA is created, there is no more option to change content of JTable. 
-					headerField.setText(" Start state of this "+name+" is: "+automaton.getStartState().getID() +
-							". \n Final state(s) of this  "+name+" are "+automaton.getFinalStates());
+					headerField.setText(" Start state of this DFA is: "+automaton.getStartState().getID() +
+							". \n Final state(s) of this DFA are: "+automaton.getFinalStates()+automaton.getFromRegex());
+					
 					if(!test)
 						buttonPanel.add(inputField,BorderLayout.NORTH);
 					
@@ -328,12 +355,13 @@ public class Frame extends JFrame {
 				for (State state : nextStates) {
 					s+=state.getID();
 				}
+				
 				table.setValueAt(s, i, j++);
 			}
 		}
 		if(automaton instanceof DFA) {
 			headerField.setText(" Start state of this DFA is: "+automaton.getStartState().getID() +
-					". \n Final state(s) of this DFA are: "+automaton.getFinalStates());
+					". \n Final state(s) of this DFA are: "+automaton.getFinalStates()+automaton.getFromRegex());
 			executeButton.setText("EXECUTE DFA");
 		}
 		else
@@ -406,7 +434,7 @@ public class Frame extends JFrame {
 		if(machine.equals("DFA"))
 			loadSavedDFA();
 		else
-			loadSavedNFA(1);
+			loadSavedNFA();
 	}
 	
 	private void loadSavedDFA() {
@@ -531,18 +559,6 @@ public class Frame extends JFrame {
 		nfa.getStateByID(5+"").addAllTransitions(nfa, ENFA.epsilon, new ArrayList<>(Arrays.asList ("null")));
 		automaton=nfa;
 		drawAutomatonFrame(true);
-	}
-	
-	private void generateDFA() {
-		
-	}
-	
-	private void E_NFAmenu(String machine) {
-		
-	}
-	
-	private void REmenu(String machine) {
-		
 	}
 	
 }
