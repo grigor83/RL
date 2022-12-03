@@ -227,7 +227,7 @@ public class ENFA extends Automaton {
 		return newState;
 	}
 	
-	private void makeDeadState(HashSet<State> visitedStates, Deque<State> dostignutaStanja) {
+	private void makeDeadState(HashSet<State> visitedStates, Deque<State> reachedStates) {
 		if (deadState!=null)
 			return;
 		
@@ -238,6 +238,6 @@ public class ENFA extends Automaton {
 		}
 		dfa.getAllStates().add(deadState);
 		visitedStates.add(deadState);
-		dostignutaStanja.addFirst(deadState);
+		reachedStates.addFirst(deadState);
 	}
 }

@@ -130,7 +130,7 @@ public class RegexToDFA {
 					shouldComplete=true;
 				}
 		if(!shouldComplete) {
-			automaton.getAllStates().remove(deadState.getAllTransitions());
+			automaton.getAllStates().remove(deadState);
 			automaton.ID--;
 		}
 		
