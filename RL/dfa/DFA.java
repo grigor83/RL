@@ -12,7 +12,7 @@ import automaton.Automaton;
 public class DFA extends Automaton {
 		
 	public void minimize() {
-        //Remove unreachable states
+        //First, remove unreachable states
 		Deque<State> stack = new ArrayDeque<>();
 		HashSet<State> visited = new HashSet<>();
 		stack.push(startState);
@@ -29,13 +29,12 @@ public class DFA extends Automaton {
 		Collections.sort(minimizedStates);
 		states.retainAll(minimizedStates);
 		finalStates.retainAll(states);
-		System.out.println("Broj stanja nakon eliminacije nedostiznih "+states.size());
-		//ID=states.size();
+		System.out.println("Number of states after removing unreachable states: "+states.size());
 		merge();
 	}
 	
 	public void merge() {
-		//Find equivalent classes
+		//Second, find equivalent classes and merge states into one states if they belong equivalent class
         HashSet<StatePair> pairs = new HashSet<>();
         HashSet<StatePair> unmarkedPairs = new HashSet<>();
         //First, if pair of states are not equivalent (one state is final, while other is not), put that pair into Set pairs.
@@ -93,7 +92,7 @@ public class DFA extends Automaton {
 		        	equivalentPairs.add(other);	
 			}
         	unmarkedPairs.removeAll(equivalentPairs);
-        	//Make new state of equivalent pairs, if any.
+        	//Make new set of equivalent pairs, if any.
         	if(!equivalentPairs.isEmpty()) {
         		StateSet ss=new StateSet();
         		equivalentPairs.stream().forEach(p -> ss.addPair(p));
@@ -101,7 +100,8 @@ public class DFA extends Automaton {
         	}
         }
         if(!newStates.isEmpty()) {
-        	System.out.println("Od ovih skupova stanja (to su skupovi ekvivalentnih STANJA) treba da napravim jedno novo stanje: ");
+        	// Making new state if there is set of equivalent pairs. 
+        	System.out.println("From this sets of states (which is sets of equivalent states) we need to make one new state: ");
             newStates.stream().forEach(System.out::println);
             newStates.stream().forEach(s -> s.makeNewStateFromEquivalent(this));
         }
@@ -112,6 +112,7 @@ public class DFA extends Automaton {
 	}
 	
 	public HashSet<State> epsilonClosure (HashSet<State> currentStates) {
+		// For DFA, there is no epsilon closure, meaning that is only this one, current state
 		return currentStates;
 	}
 }

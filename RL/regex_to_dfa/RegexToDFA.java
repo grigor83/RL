@@ -12,7 +12,7 @@ import dfa.DFA;
 import dfa.State;
 
 // Direct method is used to convert given regular expression directly into DFA. Uses augmented regular expression r#.
-// Regular expression is represented as syntax tree where interior nodes correspond to operators representing union, concatenation and closure operations.
+// Regular expression is represented as syntax tree where interior nodes correspond to operators of union, concatenation and closure operations.
 // Leaf nodes corresponds to the input symbols.
 // Construct DFA directly from a regular expression by computing the functions nullable(n), firstpos(n), lastpos(n) andfollowpos(i) from the syntax tree.
 
@@ -31,17 +31,9 @@ public class RegexToDFA {
 	    alphabet.add('#');
 		SyntaxTree st = new SyntaxTree(regex);   			// This will create binary tree and then syntax tree
 		followPos=st.getFollowPos();
-		System.out.println("Broj cvorova listova u sintaksnom stablu je "+followPos.size());
-		System.out.println("tablic followpos za svaki cvor:"); 
-		int i=0;
-		for (Set<Integer> set : followPos) {
-			System.out.println(i+": "+set);
-			i++;
-		}
 		getPositions(st);
-		startState = createDFA(st.getRoot());	
-		System.out.println("tablica prelaza novog DFA");
-		states.stream().forEach(State::printTransitions);
+		startState = generateDFAfromSyntaxTree(st.getRoot());	
+		
 		automaton = createDFA(automaton, regex);
 		return automaton;
 	}
@@ -49,11 +41,9 @@ public class RegexToDFA {
 	private static void getPositions(SyntaxTree st) {
 		// Getting position of each symbol in input regex.
 		st.postOrder(st.getRoot(), positionOfSymbolInRegex);
-//		System.out.println("pozicije simbola ");
-//		positionOfSymbolInRegex.entrySet().stream().forEach(System.out::println);
 	}
 
-	private static State createDFA(Node root) {
+	private static State generateDFAfromSyntaxTree(Node root) {
 			// Initialize states to contain only the unmarked state q0, where q0 is the root of syntax tree st for (r)#;
 		int id=0;
 		State q0 = new State(id++);  							// start state of dfa will be firstpos of root node of syntax tree
@@ -69,11 +59,10 @@ public class RegexToDFA {
 					break;
 				}
 			if(state==null)
-				break;		// break while loop
+				break;								// break while loop
 			
-			System.out.println("Uzimam stanje "+state.getName()+" i testiram ga");
-			state.setMarked(true);		// mark s
-			for (char symbol : alphabet) {			// for each symbol in alphabet
+			state.setMarked(true);					// mark s
+			for (char symbol : alphabet) {			// for each symbol in alphabet, get next set of transitions from state state
 				Set<Integer> U = new HashSet<>();	
 				for (int p : state.getName()) {
 					if(positionOfSymbolInRegex.get(p).equals(symbol+"")) // if p(leaf node id) in state name correspond to symbol,
@@ -81,8 +70,7 @@ public class RegexToDFA {
 				}
 				
 				if(!U.isEmpty()) {
-					if (checkIfContains(U)==null){
-						System.out.println("kreiram novo stanje za "+U+" u koje prelazim za simbol "+symbol+" i dodajem ga u states");
+					if (checkIfContains(U)==null){						// if states doesn't already contain set U, make new state from U
 						State q = new State(id++);
 		                q.setName(U);
 		                isFinalState(q);
@@ -90,12 +78,11 @@ public class RegexToDFA {
 			            state.getTransitions().put(symbol,new HashSet<State>(Arrays.asList(q)));
 					}
 					else {
-						System.out.println("Tranzicija u stanje "+U+" koje je vec u states,moze biti i autotranzicija, za simbol "+symbol);
+						// States already contain set U, which mean this is case of autotransition, or transition to the already existing state in states
 						state.getTransitions().put(symbol, new HashSet<State>(Arrays.asList(checkIfContains(U))));
 					}
 				}
 			}
-			System.out.println("=================");
 		}
 		
 		return q0;
@@ -135,12 +122,18 @@ public class RegexToDFA {
 		State deadState = new State(automaton.ID++);
 		automaton.getAllStates().add(deadState);
 		
-		for (char symbol : automaton.getAlphabet()) {
-			for (State state : automaton.getAllStates()) {
-				if (state.move(symbol)==null)
+		boolean shouldComplete=false;
+		for (char symbol : automaton.getAlphabet())
+			for (State state : automaton.getAllStates()) 
+				if (state.move(symbol)==null) {
 					state.addTransition(symbol, new HashSet<State>(Arrays.asList(deadState)));
-			}
+					shouldComplete=true;
+				}
+		if(!shouldComplete) {
+			automaton.getAllStates().remove(deadState.getAllTransitions());
+			automaton.ID--;
 		}
+		
 		return automaton;
 	}
 }

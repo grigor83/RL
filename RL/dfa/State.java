@@ -62,11 +62,11 @@ public class State implements Comparable<State> {
 			if(nextStates==null) {		// Ova linija je dodata zbog konvertovanja NFA u DFA, jer tada postoji mogucnost da nema prelaza u novo stanje
 				addTransition(key, new HashSet<>(Arrays.asList(newState)));
 			}
-				// Metodom retainAll brisemo sve tranzicije ovog stanja u stara stanja koja su vec obrisana iz svih stanja automata. 
-				// Nece biti obrisane tranzicije u ona stanja koja jos uvijek postoje u automatu. 
+				// Method retainAll will deleted all transitions from this state to old states, which are already deleted from states of automaton.
+				// Transitions into the states which are still in automaton, will not be deleted.
 			else if(nextStates.retainAll(automaton.getAllStates())) {  
 				nextStates.add(newState);
-				addTransition(key, nextStates);			// Onda u tranzicije this stanja dodajemo i tranziciju u novo stanje, ako je potrebno.
+				addTransition(key, nextStates);			// Then, into transitions of this state, put transition into newly created state, if necessary. 
 			}
 		}
 	}
@@ -76,13 +76,7 @@ public class State implements Comparable<State> {
 	}
 	
 	public HashSet<State> move(char symbol){
-		//System.out.println("stanje "+id+" za simbol "+symbol+" sam zavrsio u stanjima "+transitions.get(symbol));
-		//Ovo nije slucaj epsilon prelaza, nego slucaj kad za simbol nema prelaza u naredno stanje. tad treba da vrati prazan skup
-		//U stvari, ovdje ne bi ni trebao doci jer ce tad symbol biti null, a to je rijeseno u delti
-//		if(transitions.get(symbol)==null)
-//			return new HashSet<State>(Arrays.asList(this));
-//		else
-			return transitions.get(symbol);
+		return transitions.get(symbol);
 	}	
 	
 	public boolean equals(Object o) {

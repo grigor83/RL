@@ -15,7 +15,7 @@ public class ENFA extends Automaton {
 	public static final char epsilon = 'ε';
 	private State deadState=null;
 	private DFA dfa;
-	private ENFA novi;
+	private ENFA newAutomaton;
 	private HashSet<State> newFinalStates;
 	
 	@Override
@@ -29,23 +29,22 @@ public class ENFA extends Automaton {
 		// alphabet (new nfa will have new alphabet, without epsilon symbol);
 		// new transition function (without epsilon transitions);
 		// set of final states could change, if epsilon closure of some state contains state from final set.
-		novi=new ENFA();
-		novi.setAlphabet(this.alphabet);
-		int indeks = novi.alphabet.indexOf(epsilon);
-		novi.alphabet.remove(indeks);
+		newAutomaton=new ENFA();
+		newAutomaton.setAlphabet(this.alphabet);
+		int indeks = newAutomaton.alphabet.indexOf(epsilon);
+		newAutomaton.alphabet.remove(indeks);
 		newFinalStates=new HashSet<>();
-		novi.ID=this.ID;
+		newAutomaton.ID=this.ID;
 		for (State state : this.states) {
-			novi.states.add(new State(Integer.parseInt(state.getID())));
+			newAutomaton.states.add(new State(Integer.parseInt(state.getID())));
 		}
-		novi.setStartStateByID(this.startState.getID());
+		newAutomaton.setStartStateByID(this.startState.getID());
 								// Start converting...
 		HashSet<State> set= new HashSet<>();
 		for (State state : this.states) {
-			//1. korak
-			// Za svako stanje pronadji epsilon zatvorenje. Svako stanje se prosljedjuje kao skup metodu epsilonClosure
+			//1. step
+			// For each state of automaton, find epsilon closure. Each set is pass to method epsilonClosure as a set of states. 
 			set=epsilonClosure(new HashSet<>(Arrays.asList(state)));
-			//System.out.println("Za epsilon iz stanja "+state+" smo zavrsili u skupu: "+ set);
 			for (State state2 : set) {  // check if new state should be final state
 				if(this.finalStates.contains(state2))
 					newFinalStates.add(state2);
@@ -53,15 +52,15 @@ public class ENFA extends Automaton {
 			secondStep(state, set);
 		}	
 		for (State state : newFinalStates) {		//making new final set of new automaton
-			novi.setFinalState(state.getID());
+			newAutomaton.setFinalState(state.getID());
 		}
 		// Copy new NFA to old instance of epsilon NFA
 		this.states.clear();
-		this.setAllStates(novi.states);
-		this.startState=novi.startState;
+		this.setAllStates(newAutomaton.states);
+		this.startState=newAutomaton.startState;
 		this.finalStates.clear();
-		this.setFinalStates(novi.finalStates);
-		this.alphabet=novi.alphabet;
+		this.setFinalStates(newAutomaton.finalStates);
+		this.alphabet=newAutomaton.alphabet;
 				// Conversion is over!
 		System.out.println("=====================");
 		System.out.println("NFA without ε transitions");
@@ -72,15 +71,15 @@ public class ENFA extends Automaton {
 	}	
 	
 	public HashSet<State> epsilonClosure (HashSet<State> currentStates) {
-		// This method will find e-closure for parameter currentStates, and returns e-closure as set
-		// Primijeni osnovnu funkciju prelaza deltaFunction za epsilon, ona uzima skup stanja i za svako stanje gleda kud ce otici sa epsilon
+		// This method will find e-closure for parameter currentStates, and returns e-closure as set. 
+		// Method is using basic transition function deltaFunction, as a helper function.
 		HashSet<State> nextStates = deltaFunction(currentStates, epsilon);
-		// Ako nema epsilon prelaza, vratice proslijedjeni skup, tj. u njemu ce biti samo jedno stanje
+		// If there is no epsilon move from currentStates...
 		if(nextStates==null || nextStates.isEmpty() 
-				|| currentStates.containsAll(nextStates)) {	// ili nema prosirenja skupa
-			return currentStates;
+				|| currentStates.containsAll(nextStates)) {	// ...or there is no expansion of the set(no new state in currentStates)
+			return currentStates;						    // it will return the same set.
 		}
-		// U suprotnom, opet treba za svako stanje iz skupa nextStates pronaci epsilon closure od njega
+		// Else, again we need to find epsilon closure for each state from next states
 		else {
 			currentStates.addAll(epsilonClosure(nextStates));
 			return currentStates;
@@ -88,24 +87,22 @@ public class ENFA extends Automaton {
 	}	
 	
 	private void secondStep(State state, HashSet<State> set){
-		State newState=novi.getStateByID(state.getID());
-		//2. korak
-		//Kad smo pronasli epsilon zatvorenje datog stanja, svakom stanju iz tog skupa treba da proslijedimo simbole alfabeta i da vidimo 
-		//kuda ce otici sa njima.
-		for (char sym : novi.alphabet) {
-			//Za svaki simbol alfabeta, osim epsilon, treba da vidimo kuda nas vodi osnovna funkcija prelaza
+		State newState=newAutomaton.getStateByID(state.getID());
+		//2. step
+		// When we find epsilon closure of given set, to the each state from that set we are passing symbols of alphabet and looking for transitions.
+		for (char sym : newAutomaton.alphabet) {
+			// For each symbol of alphabet, beside epsilon, we should to see where lead us basic transtion function.
 			HashSet<State> nextStates= new HashSet<>();
 			nextStates=deltaFunction(set, sym);
-			//System.out.println("Skup stanja nakon drugog koraka: "+newSet);
-		//3. korak
-		//Na dobijeni skup, opet treba primijeniti epsilon zatvorenje. To ce biti nova funkcija prelaza za taj simbol.
+			//System.out.println("Set of states after second step: "+newSet);
+								//3. step
+			// Finally, on given set nextStates we again looking for epsilon closure. That will be new transition function for tha symbol. 
 			nextStates=epsilonClosure(nextStates);
-			//System.out.println("Konacno, epsilon closure stanja "+state+" za simbol "+sym+" je skup: "+newSet);
-			// U novo stanje novog automata dodajem nove tranzicije
+			// System.out.println("Finally, epsilon closure of state "+state+" for symbol "+sym+" is set: "+newSet);
+			// Then, adding new transitions into newly created state.
 			HashSet<State> newSet=new HashSet<>();
-			for (State state2 : nextStates) {
-				newSet.add(novi.getStateByID(state2.getID()));
-			}
+			for (State state2 : nextStates) 
+				newSet.add(newAutomaton.getStateByID(state2.getID()));
 			newState.addTransition(sym, newSet);
 		}
 	}
@@ -116,51 +113,56 @@ public class ENFA extends Automaton {
 		}
 
 		dfa=new DFA();
-		// pocetno stanje nfa i dfa ce biti isto, kao i alfabet
+		// Start state of NFA and DFA will be the same, as alphabet. 
 		dfa.getAllStates().add(startState);
 		dfa.setStartStateByID(startState.getID());
 		dfa.setAlphabet(alphabet);
 		HashMap <String, HashSet<State>> map= new HashMap<>();
-		// U ovom redu ce se nalaziti dostignuta stanja, bice kreirano novo kombinovano ime. Za sada jos nemaju prelaze. Sluzi nam za while petlju, da bismo
-		// obradili samo sva dostizna stanja i ni jedna druga. 
-		Deque<State> dostignutaStanja = new ArrayDeque<>();
-		HashSet<State> visitedStates= new HashSet<>();					// za kontrolu, da izbjegnemo dvostruko dodavanje istog stanja u skup dostiznih stanja.
-		dostignutaStanja.add(startState);								// Na kraju ce se u visited nalaziti sva stanja koja treba dodati u novi dfa
-				// Krecemo od pocetnog stanja i dodajemo ga u red. Za svako stanje koje se nalazi na steku, treba provjeriti tranziciju za svaki simbol.
-				// u redu ce se uvijek nalaziti niz stanja, a ne niz skupova stanja, jer cemo skup stanja uvijek sazimati u novo stanje.
-		while(!dostignutaStanja.isEmpty()) {
-			State currentState= dostignutaStanja.pollFirst();
+		// This deque will hold reached states, it will be create new combined name. For now, states don't have transitions. This deque is use for while loop, 
+		// to process only reached states and no one else. 
+		Deque<State> markedStates = new ArrayDeque<>();
+		// visitedStates is use for avoiding putting of the same state twice into set reachedStates. 
+		// On the end, it will hold all states which need to put into new DFA. 
+		HashSet<State> visitedStates= new HashSet<>();			
+		markedStates.add(startState);	
+				// Starting from the start state and put them into deque. Deque will have only array of states, not array of set of states because we always
+				// first create new state and then put him into deque. 
+		while(!markedStates.isEmpty()) {
+			// Poll state from stack and for each state from marked states we need to test his transitions. 
+			State currentState= markedStates.pollFirst();
 			visitedStates.add(currentState);
-			System.out.println("Sa steka uzimam "+currentState.getID()+" i testiram njegove prelaze");
-			// Provjeravamo tranziciju za svaki simbol iz trenutnog stanja.
+			System.out.println("From stack pop up "+currentState.getID()+" and testing his transitions");
+			// For each symbol we check transition from current state.
 			for (char sym : alphabet) {
 				HashSet<State> nextStates = currentState.move(sym);
-				// Moze se desiti tri slucaja: da vrati null, sto znaci da nema tranzicije u iduce stanje za ovaj simbol. Trebamo napraviti novo stanje,
-				// tj. dead state. Ono treba da bude samo jedno, i kad ga kreiramo, trenutnom stanju cemo dodati tranziciju u njega. 
+				// Possible three outcome for currentState.move(): to return null, meaning there is no transition for this symbol and we need to make new 
+				// state, called dead state, if dead state is not already created. 
+				// After creating dead state, we adding current state transition to dead state. 
 				if(nextStates==null || nextStates.size()==0) {
-					makeDeadState(visitedStates, dostignutaStanja);
+					makeDeadState(visitedStates, markedStates);
 					currentState.addTransition(sym, new HashSet<>(Arrays.asList(deadState)));
 				}
-				// Drugi slucaj je da vrati samo jedno stanje, moramo ga obraditi u slucaju da je njegov prelaz u null, ako vec nije obradjen
+				// Second case, ir return only one state, we need to process them if he has null transition (if that state has not been already processed).
 				else if(nextStates.size()==1) {
 					if(!visitedStates.contains(nextStates.stream().findAny().get())) {
-						dostignutaStanja.addFirst(nextStates.stream().findAny().get());
+						markedStates.addFirst(nextStates.stream().findAny().get());
 					}
 				}
-				// Treci slucaj je da vrati skup stanja, tad moramo kreirati novo stanje od tog skupa. Za sada ce tranzicije ostati prelazi u skup stanja
+				// Third case: return set of states, then we need to create new state from that set. For now, transitions remaining as transitions into set of
+				// states
 				else {
 					if (nextStates.contains(deadState))
 						nextStates.removeAll(new HashSet<>(Arrays.asList(deadState)));
-					// Pravimo novo stanje od skupa koji je vracen samo u slucaju da taj skup vec nismo dohvatili
+					// Making new state from the set only if that set haven't been already processed. 
 					if(!map.containsValue(nextStates)) {
-						State novoStanje= makeNewState(nextStates, visitedStates, dostignutaStanja);
+						State novoStanje= makeNewState(nextStates, visitedStates, markedStates);
 						map.put(novoStanje.getID(), nextStates);
-						dostignutaStanja.addFirst(novoStanje);
+						markedStates.addFirst(novoStanje);
 					}
 				}
 			}
 		}
-		// Dodavanje preostalih stanja iz starog NFA koja nisu promijenjena
+		// Add remaining states from the old NFA which has not been changed.
 		for (State state : visitedStates) {
 			if (!dfa.getAllStates().contains(state)) {
 				dfa.getAllStates().add(state);
@@ -168,7 +170,7 @@ public class ENFA extends Automaton {
 					dfa.getFinalStates().add(state);
 			}
 		}
-		// Nove tranzicije u nova stanja koja su nastala kao unije
+		// Connecting old states and new states (which are created from set of states as union). 
 		conectNewStates(dfa,map);
 		
 		System.out.println("Novi dfa");
@@ -181,7 +183,7 @@ public class ENFA extends Automaton {
 		for (State state : dfa.getAllStates()) {
 			for (char symbol : dfa.getAlphabet()) {
 				HashSet<State> set=state.move(symbol);
-				if(set.size()==1)					// ako prelazi samo u jedno stanje,ne treba mijenjati
+				if(set.size()==1)					// if move only into one state, should not be changed. 
 					continue;
 				
 				for (Entry<String, HashSet<State>> entry : map.entrySet()) {
@@ -208,7 +210,7 @@ public class ENFA extends Automaton {
 				break;
 			}
 		
-		//Sad treba mapirati tranzicije svakog stanja koje treba sazeti u novo stanje		
+		// Mapping transitions of each state should have been merged into new state. 
 		for(char symbol : alphabet) {
 			HashSet<State> prelazi = deltaFunction(set, symbol);		
 			if(prelazi.size()>1)
@@ -220,7 +222,7 @@ public class ENFA extends Automaton {
 			}
 			newState.addTransition(symbol, prelazi);
 		}
-		System.out.println("Napravio sam novo stanje "+newState.getID()+" od ovih: "+set.toString());
+		System.out.println("A new state is created "+newState.getID()+" from this set of states: "+set.toString());
 		newState.printTransitions();
 		return newState;
 	}

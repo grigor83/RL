@@ -64,25 +64,9 @@ public class Frame extends JFrame {
 	    		break;
 	    	case 1: menu("e-NFA");
 				break;
-	    	case 2: menu();
+	    	case 2: String regex = JOptionPane.showInputDialog("Enter regular expresion:");
+					convertRegexToDFA(regex);
 				break;
-	    }
-	}
-	
-	private void menu() {
-		String[] options = {"Execute regex ", "Test saved regex"};
-		JList<String> list=new JList<>(options);
-	    JOptionPane.showMessageDialog(null, list, "Choose option", JOptionPane.PLAIN_MESSAGE);
-	    int index= list.getSelectedIndex();
-	    if(index==-1)
-	    	System.exit(1);
-	    
-	    switch(index) {
-	    	case 0: String regex = JOptionPane.showInputDialog("Enter regular expresion:");
-	    			convertRegexToDFA(regex);
-	    			break;
-	    	case 1: loadSavedRegex();
-					break;
 	    }
 	}
 
@@ -92,10 +76,6 @@ public class Frame extends JFrame {
 		minimizeButton.hide();
 	}
 	
-	private void loadSavedRegex() {
-		
-	}
-
 	private void menu(String machine) {
 		String[] options = {"Create "+machine, "Test saved "+machine};
 		JList<String> list=new JList<>(options);
@@ -254,7 +234,9 @@ public class Frame extends JFrame {
 						name="E_NFA";
 					table.setEnabled(false);		// Once table is created, meaning DFA is created, there is no more option to change content of JTable. 
 					headerField.setText(" Start state of this DFA is: "+automaton.getStartState().getID() +
-							". \n Final state(s) of this DFA are: "+automaton.getFinalStates()+automaton.getFromRegex());
+							". \n Final state(s) of this DFA are: "+automaton.getFinalStates());
+					if(automaton.getFromRegex()!=null)  
+						headerField.append(automaton.getFromRegex());
 					
 					if(!test)
 						buttonPanel.add(inputField,BorderLayout.NORTH);
@@ -361,7 +343,9 @@ public class Frame extends JFrame {
 		}
 		if(automaton instanceof DFA) {
 			headerField.setText(" Start state of this DFA is: "+automaton.getStartState().getID() +
-					". \n Final state(s) of this DFA are: "+automaton.getFinalStates()+automaton.getFromRegex());
+					". \n Final state(s) of this DFA are: "+automaton.getFinalStates());
+			if(automaton.getFromRegex()!=null)  
+				headerField.append(automaton.getFromRegex());
 			executeButton.setText("EXECUTE DFA");
 		}
 		else
@@ -434,29 +418,14 @@ public class Frame extends JFrame {
 		if(machine.equals("DFA"))
 			loadSavedDFA();
 		else
-			loadSavedNFA();
+			loadSavedNFA(1);
 	}
 	
 	private void loadSavedDFA() {
-		// This saved DFA is from lecture 2, slide 54
-		int numberOfStates = 11;
-		int startStateID=0;
-		ArrayList<Integer> finalStatesID=new ArrayList<>(Arrays.asList (1,4,8));
-		ArrayList<Character> alphabet = new ArrayList<>(Arrays.asList('a','b'));
+		// This saved DFA is from lecture 2, slide 54: number of states 11, startstate 0, final states 1,4,8
+		Automaton dfa =new DFA();
+		dfa=createAutomaton(dfa, 11, 0, new ArrayList<>(Arrays.asList (1,4,8)), new ArrayList<>(Arrays.asList('a','b')));
 		
-		DFA dfa;
-		dfa=new DFA();
-		ArrayList<State> states=new ArrayList<>();
-		for(int i=0; i<numberOfStates;i++)
-			states.add(new State(dfa.ID++));
-		dfa.setAllStates(states);
-		dfa.setStartStateByID(startStateID+"");
-		dfa.setAlphabet(alphabet);
-		HashSet<State> finalStates=new HashSet<>();
-		for (Integer id : finalStatesID) {
-			finalStates.add(dfa.getStateByID(id+""));
-		}
-		dfa.setFinalStates(finalStates);
 		dfa.getStateByID(0+"").addAllTransitions(dfa, 'a', new ArrayList<>(Arrays.asList ("6")));
 		dfa.getStateByID(0+"").addAllTransitions(dfa, 'b', new ArrayList<>(Arrays.asList ("1")));
 		dfa.getStateByID(1+"").addAllTransitions(dfa, 'a', new ArrayList<>(Arrays.asList ("2")));
@@ -485,24 +454,10 @@ public class Frame extends JFrame {
 	
 	private void loadSavedNFA() {
 		// This saved NFA (regular NFA,without e-transitions) is from lecture 3, slide 38
-		int numberOfStates = 6;
-		int startStateID=0;
-		ArrayList<Integer> finalStatesID=new ArrayList<>(Arrays.asList (5));
-		ArrayList<Character> alphabet = new ArrayList<>(Arrays.asList('a','b'));
+		//  number of states 6, startstate 0, final state 5
+		Automaton nfa =new ENFA();
+		nfa=createAutomaton(nfa, 6, 0, new ArrayList<>(Arrays.asList (5)), new ArrayList<>(Arrays.asList('a','b')));
 		
-		ENFA nfa;
-		nfa=new ENFA();
-		ArrayList<State> states=new ArrayList<>();
-		for(int i=0; i<numberOfStates;i++)
-			states.add(new State(nfa.ID++));
-		nfa.setAllStates(states);
-		nfa.setStartStateByID(startStateID+"");
-		nfa.setAlphabet(alphabet);
-		HashSet<State> finalStates=new HashSet<>();
-		for (Integer id : finalStatesID) {
-			finalStates.add(nfa.getStateByID(id+""));
-		}
-		nfa.setFinalStates(finalStates);
 		nfa.getStateByID(0+"").addAllTransitions(nfa, 'a', new ArrayList<>(Arrays.asList ("1,2,4")));
 		nfa.getStateByID(0+"").addAllTransitions(nfa, 'b', new ArrayList<>(Arrays.asList ("0")));
 		nfa.getStateByID(1+"").addAllTransitions(nfa, 'a', new ArrayList<>(Arrays.asList ("2,5")));
@@ -521,24 +476,9 @@ public class Frame extends JFrame {
 	
 	private void loadSavedNFA(int a) {
 		// This saved e-NFA is from lecture 3, slide 37
-		int numberOfStates = 6;
-		int startStateID=0;
-		ArrayList<Integer> finalStatesID=new ArrayList<>(Arrays.asList (5));
-		ArrayList<Character> alphabet = new ArrayList<>(Arrays.asList('a','b', ENFA.epsilon));
+		Automaton nfa =new ENFA();
+		nfa=createAutomaton(nfa, 6, 0, new ArrayList<>(Arrays.asList (5)), new ArrayList<>(Arrays.asList('a','b', ENFA.epsilon)));		
 		
-		ENFA nfa;
-		nfa=new ENFA();
-		ArrayList<State> states=new ArrayList<>();
-		for(int i=0; i<numberOfStates;i++)
-			states.add(new State(nfa.ID++));
-		nfa.setAllStates(states);
-		nfa.setStartStateByID(startStateID+"");
-		nfa.setAlphabet(alphabet);
-		HashSet<State> finalStates=new HashSet<>();
-		for (Integer id : finalStatesID) {
-			finalStates.add(nfa.getStateByID(id+""));
-		}
-		nfa.setFinalStates(finalStates);
 		nfa.getStateByID(0+"").addAllTransitions(nfa, 'a', new ArrayList<>(Arrays.asList ("1")));
 		nfa.getStateByID(0+"").addAllTransitions(nfa, 'b', new ArrayList<>(Arrays.asList ("0")));
 		nfa.getStateByID(0+"").addAllTransitions(nfa, ENFA.epsilon, new ArrayList<>(Arrays.asList ("null")));
@@ -561,4 +501,15 @@ public class Frame extends JFrame {
 		drawAutomatonFrame(true);
 	}
 	
+	private Automaton createAutomaton(Automaton machine, int numberOfStates, int startState, 
+											ArrayList<Integer> finalStatesID, ArrayList<Character> alphabet) {
+		for(int i=0; i<numberOfStates;i++)
+			machine.getAllStates().add(new State(machine.ID++));
+		machine.setStartStateByID(startState+"");
+		machine.setAlphabet(alphabet);
+		for (Integer id : finalStatesID)
+			machine.getFinalStates().add(machine.getStateByID(id+""));
+		
+		return machine;
+	}
 }

@@ -2,9 +2,11 @@ package regex_to_dfa;
 import java.util.HashMap;
 import java.util.Stack;
 
+// I am using method of converting infix expression to postfix for creating binary tree. Leaf nodes will be chars of input string and interior nodes will
+// be operators (*, | or .)
 public class BinaryTree {
 	private int numberOfLeafNodes;
-	private String newRegex;
+	private String augmentedRegex;
 	private String postfixRegex="";
     private Stack<Node> stackNode= new Stack<>();
 	
@@ -15,19 +17,20 @@ public class BinaryTree {
 
 	public Node createBinaryTree () {
 		Stack<Character> operatorsStack = new Stack<Character>();
-		for (Character character : newRegex.toCharArray()) {
-			if(RegexToDFA.alphabet.contains(character)) {  // ako je u pitanju simbol, odmah ga saljemo u postfix
+		for (Character character : augmentedRegex.toCharArray()) {
+			if(RegexToDFA.alphabet.contains(character)) {  // If character in input string is symbol of alphabet, create leaf node of binary tree. 
 				postfixRegex+=character;
 				createLeafNode(character+"");
 			}
-			else {										// onda je u pitanju operator ili neka zagrada
-				while(!operatorsStack.isEmpty() && checkPriority(character, operatorsStack.peek())) {  // praznimo stek sve dok ne ispraznimo stek
+			else {										// Else, then character is operator or some kind of parenthesis
+				// Empty the stack to the bottom, or while op on the stack has bigger priority from new op
+				while(!operatorsStack.isEmpty() && checkPriority(character, operatorsStack.peek())) {  
 					char operator = operatorsStack.pop();
-					postfixRegex+=operator;								// ili dok je operator na steku veceg prioriteta od novog operatora
+					postfixRegex+=operator;							
 					createInteriorNode(operator);
 				}
 				
-				if(operatorsStack.isEmpty() || character != ')')  // stavljamo novi operator na stek samo ako nije desna zagrada
+				if(operatorsStack.isEmpty() || character != ')')  // Put new operator on stack only if not ')'
 					operatorsStack.push(character);
 				else
 					operatorsStack.pop();    							// Pop the '(' left parenthesis
@@ -39,7 +42,7 @@ public class BinaryTree {
 			postfixRegex+=operator;		
 			createInteriorNode(operator);
 		}
-		System.out.println("Postfix je: "+postfixRegex);
+		System.out.println("Postfix expresion: "+postfixRegex);
 		return getRoot();
 	}
 	
@@ -51,8 +54,7 @@ public class BinaryTree {
     }
 	
 	private void createInteriorNode(char operator) {
-		System.out.println("pravim unutrasnji za operator "+operator);
-		System.out.println("postfix: "+postfixRegex);
+		System.out.println("Making interior node for operator: "+operator);
 		 switch (operator) {
          	case ('|'):	union();
  						break;
@@ -130,34 +132,34 @@ public class BinaryTree {
 	}
 
 	private void concatRegex(String regex) {
-		newRegex = "";
+		augmentedRegex = "";
 
         for (int i = 0; i < regex.length() - 1; i++) {
         	if(RegexToDFA.alphabet.contains(regex.charAt(i)) && RegexToDFA.alphabet.contains(regex.charAt(i+1))) {  // in the case of ab, then put . between 
-        		newRegex+=regex.charAt(i)+".";
+        		augmentedRegex+=regex.charAt(i)+".";
         	}
         	else if (RegexToDFA.alphabet.contains(regex.charAt(i)) && regex.charAt(i+1)=='(') {  // in the case of a(, then change to a.(
-        		newRegex+=regex.charAt(i)+".";
+        		augmentedRegex+=regex.charAt(i)+".";
         	}
         	else if (regex.charAt(i)==')' && RegexToDFA.alphabet.contains(regex.charAt(i+1))) {   // in the case of )a, then change to ).a
-        		newRegex+=regex.charAt(i)+".";
+        		augmentedRegex+=regex.charAt(i)+".";
         	}        	
         	else if (regex.charAt(i)=='*' && RegexToDFA.alphabet.contains(regex.charAt(i+1))) {  // in the case of *a, then change to *.a
-        		newRegex+=regex.charAt(i)+".";
+        		augmentedRegex+=regex.charAt(i)+".";
         	}
         	else if (regex.charAt(i)=='*' && regex.charAt(i+1)=='('){				// in the case of *(, then change to *.(
-        		newRegex+=regex.charAt(i)+".";
+        		augmentedRegex+=regex.charAt(i)+".";
         	}
         	else if (regex.charAt(i) == ')' && regex.charAt(i + 1) == '(') {		// in the case of )(, then change to ).(
-        		newRegex+=regex.charAt(i)+".";
+        		augmentedRegex+=regex.charAt(i)+".";
         	}
         	else
-        		newRegex+=regex.charAt(i);
+        		augmentedRegex+=regex.charAt(i);
 
         }
-        newRegex += regex.charAt(regex.length() - 1);   // add last symbol in input string
-        newRegex= '('+newRegex+").#";
-		System.out.println("Novi regex sa ubacenom . je: "+ newRegex);
+        augmentedRegex += regex.charAt(regex.length() - 1);   // add last symbol in input string
+        augmentedRegex= '('+augmentedRegex+").#";
+		System.out.println("Augmented regex are: "+ augmentedRegex);
 	}
 	
 	public Node getRoot () {

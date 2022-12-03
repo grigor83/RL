@@ -24,7 +24,7 @@ public class StateSet {
 	public State makeNewStateFromEquivalent(Automaton automaton){
 		if(equivalentStates.isEmpty())
 			return null;
-		System.out.println("pravim novo stanje od ovih: "+equivalentStates.toString());
+		System.out.println("Making new state from these: "+equivalentStates.toString());
 		State newState=new State(automaton.ID++);  // renaming new state
 		newState.printTransitions();
 		automaton.getAllStates().add(newState);		// add new state to automaton
@@ -45,7 +45,7 @@ public class StateSet {
 		}
 		if(add)
 			automaton.setFinalState(newState.getID());
-		//Sad treba mapirati tranzicije svakog stanja koje treba sazeti u novo stanje
+		// Now, map all transitions of equivalent state which need to merge into new state
 		boolean stop=false;
 		for (State state : equivalentStates) {
 			if(stop)
@@ -62,10 +62,10 @@ public class StateSet {
 					newState.addTransition(symbol, nextStates);
 			}
 		}
-		//sad treba promijeniti i tranzicije svih ostalih stanja, ako je potrebno
+		// Now, we need to change and transitions of all other states in automaton and set them to move to new state, if necessary. 
 		automaton.getAllStates().forEach(state -> state.changeTransitions(automaton, newState));
 		return newState;
-//		System.out.println("Nova stanja i prelazi DFA su");
+//		System.out.println("New DFA, with new states and transitions");
 //		dfa.print();
 	}
 	
