@@ -106,6 +106,7 @@ public class DFA extends Automaton {
             newStates.stream().forEach(System.out::println);
             newStates.stream().forEach(s -> s.makeNewStateFromEquivalent(this));
         }
+        setShortestWord(findShortestWord());
 	}	
 	
 	public DFA convert() {
@@ -115,5 +116,24 @@ public class DFA extends Automaton {
 	public HashSet<State> epsilonClosure (HashSet<State> currentStates) {
 		// For DFA, there is no epsilon closure, meaning that is only this one, current state
 		return currentStates;
+	}
+	
+	public int findShortestWord() {
+		// Using BFS traversing the graph of DFA until we end up in final state. 
+		int length=0;
+		HashSet<State> neighbors = new HashSet<>();
+		neighbors.add(startState);
+		while(neighbors.size()!=0) {
+			if(machineAcceptInput(neighbors))
+				return length;
+			
+			HashSet<State> temp=new HashSet<>();
+			for (State state : neighbors) 
+				temp.addAll(state.getAllTransitions());
+			neighbors.clear();
+			neighbors.addAll(temp);
+			length++;
+		}
+		return length;
 	}
 }

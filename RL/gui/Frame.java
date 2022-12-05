@@ -234,7 +234,8 @@ public class Frame extends JFrame {
 						name="E_NFA";
 					table.setEnabled(false);		// Once table is created, meaning DFA is created, there is no more option to change content of JTable. 
 					headerField.setText(" Start state of this DFA is: "+automaton.getStartState().getID() +
-							". \n Final state(s) of this DFA are: "+automaton.getFinalStates());
+							". \n Final state(s) of this DFA are: "+automaton.getFinalStates()
+							+ "\n Shortest word of this DFA (must be minimized) is: "+automaton.getShortestWord());
 					if(automaton.getFromRegex()!=null)  
 						headerField.append(automaton.getFromRegex());
 					
@@ -343,7 +344,8 @@ public class Frame extends JFrame {
 		}
 		if(automaton instanceof DFA) {
 			headerField.setText(" Start state of this DFA is: "+automaton.getStartState().getID() +
-					". \n Final state(s) of this DFA are: "+automaton.getFinalStates());
+					". \n Final state(s) of this DFA are: "+automaton.getFinalStates()
+					+ "\n Shortest word of this DFA (must be minimized) is: "+automaton.getShortestWord());
 			if(automaton.getFromRegex()!=null)  
 				headerField.append(automaton.getFromRegex());
 			executeButton.setText("EXECUTE DFA");
@@ -422,7 +424,7 @@ public class Frame extends JFrame {
 	}
 	
 	private void loadSavedDFA() {
-		// This saved DFA is from lecture 2, slide 54: number of states 11, startstate 0, final states 1,4,8
+		// This saved DFA is from the lecture 2, slide 54: number of states 11, startstate 0, final states 1,4,8
 		Automaton dfa =new DFA();
 		dfa=createAutomaton(dfa, 11, 0, new ArrayList<>(Arrays.asList (1,4,8)), new ArrayList<>(Arrays.asList('a','b')));
 		

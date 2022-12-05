@@ -16,11 +16,20 @@ public abstract class Automaton {
 	protected HashSet<State> finalStates;
 	protected ArrayList<Character> alphabet; 
 	private String createdFromRegex;
+	private int shortestWord=-1;
 	
 	public Automaton() {
 		states=new ArrayList<>();
 		finalStates=new HashSet<>();
 		alphabet=new ArrayList<>();
+	}
+	
+	public int getShortestWord() {
+		return shortestWord;
+	}
+	
+	public void setShortestWord(int i) {
+		shortestWord=i;
 	}
 	
 	public ArrayList<State> getAllStates(){
@@ -91,8 +100,9 @@ public abstract class Automaton {
 		// Check is input string is accepted. 
 		//Find intersection of states in wich we ended with input string and final states
 		System.out.println("We ended up in state(s): "+states);
-		states.retainAll(finalStates);
-		if(states.isEmpty())
+		HashSet<State> temp= new HashSet<>(states);
+		temp.retainAll(finalStates);
+		if(temp.size()==0) 
 			return false;
 		else
 			return true;
@@ -129,7 +139,7 @@ public abstract class Automaton {
 	}
 											// BASIC TRANSITION FUNCTION
 	public HashSet<State> deltaFunction(HashSet<State> currentStates, char sign){
-		System.out.println("Na skup stanja "+currentStates+" primjenjujem osn. funkciju prelaza za simbol: "+sign);
+		System.out.println("On set of states: "+currentStates+" apply basic delta function for symbol: "+sign);
 		// If statement testing return value of previous function call of extended function. If return value is null, then makes no sense to apply basic 
 		// delta function for this particular symbol. 
 		// In the case of DFA, previous call of delta function will always will return exactly one state, but in the case of NFA return value could be 

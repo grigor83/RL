@@ -173,7 +173,7 @@ public class ENFA extends Automaton {
 		// Connecting old states and new states (which are created from set of states as union). 
 		conectNewStates(dfa,map);
 		
-		System.out.println("Novi dfa");
+		System.out.println("New dfa");
 		dfa.print();
 		dfa.ID=ID;
 		return dfa;
