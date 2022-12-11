@@ -72,6 +72,9 @@ public class Frame extends JFrame {
 
 	private void convertRegexToDFA(String regex) {
 		automaton = RegexToDFA.convert(automaton, regex.trim());
+		DFA dfa=(DFA) automaton;
+		dfa.setShortestWord(dfa.findShortestWord());
+		dfa.isInfinite();
 		drawAutomatonFrame(true);
 		minimizeButton.hide();
 	}
@@ -233,9 +236,11 @@ public class Frame extends JFrame {
 					else
 						name="E_NFA";
 					table.setEnabled(false);		// Once table is created, meaning DFA is created, there is no more option to change content of JTable. 
-					headerField.setText(" Start state of this DFA is: "+automaton.getStartState().getID() +
-							". \n Final state(s) of this DFA are: "+automaton.getFinalStates()
-							+ "\n Shortest word of this DFA (must be minimized) is: "+automaton.getShortestWord());
+					headerField.setText(" Start state of this "+name+" is: "+automaton.getStartState().getID() +
+							". \n Final state(s) of this "+name+" are: "+automaton.getFinalStates());
+					if(automaton instanceof DFA)
+						headerField.append("\n Shortest word of this DFA (must be minimized) is: "+automaton.getShortestWord() +
+							" \n Language of this DFA (must be minimized) is infinite: "+automaton.isInfiniteLanguage());
 					if(automaton.getFromRegex()!=null)  
 						headerField.append(automaton.getFromRegex());
 					
@@ -345,7 +350,8 @@ public class Frame extends JFrame {
 		if(automaton instanceof DFA) {
 			headerField.setText(" Start state of this DFA is: "+automaton.getStartState().getID() +
 					". \n Final state(s) of this DFA are: "+automaton.getFinalStates()
-					+ "\n Shortest word of this DFA (must be minimized) is: "+automaton.getShortestWord());
+					+ "\n Shortest word of this DFA (must be minimized) is: "+automaton.getShortestWord()+
+					" \n Language of this DFA (must be minimized) is infinite: "+automaton.isInfiniteLanguage());
 			if(automaton.getFromRegex()!=null)  
 				headerField.append(automaton.getFromRegex());
 			executeButton.setText("EXECUTE DFA");

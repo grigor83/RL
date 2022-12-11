@@ -107,6 +107,7 @@ public class DFA extends Automaton {
             newStates.stream().forEach(s -> s.makeNewStateFromEquivalent(this));
         }
         setShortestWord(findShortestWord());
+        isInfinite();
 	}	
 	
 	public DFA convert() {
@@ -135,5 +136,100 @@ public class DFA extends Automaton {
 			length++;
 		}
 		return length;
+	}
+	
+	//The language accepted by a DFA is infinite if and only if there exists some cycle on some path from which a final state is reachable.
+	// First, I use some variation of DFS to find if graph of DFA has any cycle. Then, check if final state is reachable from any state in that cycle.
+	public void isInfinite() {
+		int[][] matrix = createAdjacencyMatrix();
+		// Mark all the vertices as not visited and not part of recursion stack
+		boolean[] visited = new boolean[states.size()];
+		boolean[] stack =  new boolean[states.size()];
+		LinkedList<LinkedList<Integer>> cycles=new LinkedList<>();
+		// Start search for cycles in the graph from first node, which is start state of automaton
+		checkCycle(matrix, visited, stack, 0, cycles);
+//		System.out.println("Cycles found:");
+//		ciklusi.forEach(System.out::println);
+		if (!cycles.isEmpty() && reachFinalStateFromCycle(matrix, cycles)) {
+			System.out.println("Language is infinite!");
+			setInfiniteLanguage(true);
+		}
+	}
+	
+	private int[][] createAdjacencyMatrix() {
+		int [][] matrix = new int[states.size()] [states.size()];
+		
+		for(int i=0;i<states.size();i++) {
+			State state=states.get(i);
+			HashSet<State> nextStates = state.getAllTransitions();
+			if(!nextStates.isEmpty()) {
+				for (State state2 : nextStates) {
+					int j= states.indexOf(state2);
+					matrix[i][j]=1;
+				}
+			}
+		}
+		
+		return matrix;
+	}
+	
+	private void checkCycle(int[][] matrix, boolean[] visited, boolean[] stack, int node, LinkedList<LinkedList<Integer>> cycles) {
+		if(stack[node])
+			saveCycle(stack, node, cycles);
+		// If node is already visited, it means that he is already processed
+		if(visited[node])
+			return;
+		
+		stack[node]=true;
+		visited[node]= true;
+		// Now, process children of current node and check if there is a cycle. 
+		for(int j=0; j<states.size(); j++) 
+			if(matrix[node][j]>0)
+				checkCycle(matrix, visited, stack, j, cycles);
+		// After processing current node and all of his children, remove current node from stack. 
+		stack[node]=false;
+	}
+
+	private void saveCycle(boolean[] stack, int node, LinkedList<LinkedList<Integer>> cycles) {
+		// Save the found cycle from first node in the cycle to the end of that cycle. 
+		LinkedList<Integer> list=new LinkedList<>();
+		for(int i=node; i<states.size();i++)
+			if(stack[i]) 
+				list.add(i);
+		cycles.add(list);
+	}
+
+	private boolean reachFinalStateFromCycle(int[][] matrix, LinkedList<LinkedList<Integer>> cycles) {
+		// First, find index of all final states because adjacency matrix.
+		HashSet<Integer> indexesOfFinalStates= new HashSet<>();
+		for (State state : finalStates)
+			indexesOfFinalStates.add(states.indexOf(state));
+		//System.out.println("Indexes of final states: "+indexesOfFinalStates);
+		// Check if we can reach final states from any state in the cycle. If we can reach, it means language is infinite. 
+		for (LinkedList<Integer> list : cycles) 
+			for (int i : list) {
+				boolean[] visited = new boolean[states.size()];
+				if(DFSvisit(indexesOfFinalStates, matrix, visited, i)) 
+					return true;
+			}
+		
+		return false;
+	}
+		// Using DFS we traversed the graph to check if final state(s) are reachable from any state of cycle. 
+	private boolean DFSvisit(HashSet<Integer> indexesOfFinalStates, int[][] matrix, boolean[] visited, int i) {
+		if(visited[i])
+			return false;
+		if(indexesOfFinalStates.contains(i))
+			return true;
+		visited[i]=true;
+
+		boolean result=false;
+		for(int j=0; j<states.size();j++)
+			if(matrix[i][j]>0 && DFSvisit(indexesOfFinalStates, matrix, visited, j)) {
+				result=true;
+				break;
+			}
+		
+		return result;
 	}
 }

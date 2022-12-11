@@ -17,6 +17,7 @@ public abstract class Automaton {
 	protected ArrayList<Character> alphabet; 
 	private String createdFromRegex;
 	private int shortestWord=-1;
+	private boolean infiniteLanguage;
 	
 	public Automaton() {
 		states=new ArrayList<>();
@@ -30,6 +31,14 @@ public abstract class Automaton {
 	
 	public void setShortestWord(int i) {
 		shortestWord=i;
+	}
+	
+	public boolean isInfiniteLanguage() {
+		return infiniteLanguage;
+	}
+	
+	public void setInfiniteLanguage(boolean b) {
+		infiniteLanguage=b;
 	}
 	
 	public ArrayList<State> getAllStates(){
