@@ -4,7 +4,7 @@ import java.util.LinkedList;
 import javax.swing.table.AbstractTableModel;
 
 import automaton.Automaton;
-import dfa.State;
+import states.State;
 
 public class MyTableModel extends AbstractTableModel {
 	private LinkedList<Character> columnNames;

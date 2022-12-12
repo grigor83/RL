@@ -1,4 +1,4 @@
-package dfa;
+package states;
 
 import java.util.HashSet;
 

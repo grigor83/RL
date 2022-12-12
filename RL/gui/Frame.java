@@ -28,10 +28,10 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
 
 import automaton.Automaton;
-import dfa.DFA;
-import dfa.State;
-import enfa.ENFA;
+import automaton.DFA;
+import automaton.ENFA;
 import regex_to_dfa.RegexToDFA;
+import states.State;
 
 
 public class Frame extends JFrame {
@@ -73,8 +73,9 @@ public class Frame extends JFrame {
 	private void convertRegexToDFA(String regex) {
 		automaton = RegexToDFA.convert(automaton, regex.trim());
 		DFA dfa=(DFA) automaton;
-		dfa.setShortestWord(dfa.findShortestWord());
 		dfa.isInfinite();
+		dfa.findShortestWord();
+		dfa.findLongestWord();
 		drawAutomatonFrame(true);
 		minimizeButton.hide();
 	}
@@ -240,6 +241,7 @@ public class Frame extends JFrame {
 							". \n Final state(s) of this "+name+" are: "+automaton.getFinalStates());
 					if(automaton instanceof DFA)
 						headerField.append("\n Shortest word of this DFA (must be minimized) is: "+automaton.getShortestWord() +
+								"\n Longest word of this DFA (must be minimized) is: "+automaton.getLongestWord() +
 							" \n Language of this DFA (must be minimized) is infinite: "+automaton.isInfiniteLanguage());
 					if(automaton.getFromRegex()!=null)  
 						headerField.append(automaton.getFromRegex());
@@ -351,6 +353,7 @@ public class Frame extends JFrame {
 			headerField.setText(" Start state of this DFA is: "+automaton.getStartState().getID() +
 					". \n Final state(s) of this DFA are: "+automaton.getFinalStates()
 					+ "\n Shortest word of this DFA (must be minimized) is: "+automaton.getShortestWord()+
+					"\n Longest word of this DFA (must be minimized) is: "+automaton.getLongestWord() +
 					" \n Language of this DFA (must be minimized) is infinite: "+automaton.isInfiniteLanguage());
 			if(automaton.getFromRegex()!=null)  
 				headerField.append(automaton.getFromRegex());

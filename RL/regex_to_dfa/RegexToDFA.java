@@ -8,8 +8,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import automaton.Automaton;
-import dfa.DFA;
-import dfa.State;
+import automaton.DFA;
+import states.State;
 
 // Direct method is used to convert given regular expression directly into DFA. Uses augmented regular expression r#.
 // Regular expression is represented as syntax tree where interior nodes correspond to operators of union, concatenation and closure operations.

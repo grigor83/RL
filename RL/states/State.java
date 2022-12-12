@@ -1,4 +1,4 @@
-package dfa;
+package states;
 
 import java.util.ArrayList;
 import java.util.Arrays;

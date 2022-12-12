@@ -1,4 +1,4 @@
-package dfa;
+package automaton;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -8,7 +8,9 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Stack;
 
-import automaton.Automaton;
+import states.State;
+import states.StatePair;
+import states.StateSet;
 
 public class DFA extends Automaton {
 		
@@ -106,8 +108,9 @@ public class DFA extends Automaton {
             newStates.stream().forEach(System.out::println);
             newStates.stream().forEach(s -> s.makeNewStateFromEquivalent(this));
         }
-        setShortestWord(findShortestWord());
         isInfinite();
+        findShortestWord();
+        findLongestWord();
 	}	
 	
 	public DFA convert() {
@@ -119,14 +122,14 @@ public class DFA extends Automaton {
 		return currentStates;
 	}
 	
-	public int findShortestWord() {
+	public void findShortestWord() {
 		// Using BFS traversing the graph of DFA until we end up in final state. 
 		int length=0;
 		HashSet<State> neighbors = new HashSet<>();
 		neighbors.add(startState);
 		while(neighbors.size()!=0) {
 			if(machineAcceptInput(neighbors))
-				return length;
+				break;
 			
 			HashSet<State> temp=new HashSet<>();
 			for (State state : neighbors) 
@@ -135,7 +138,8 @@ public class DFA extends Automaton {
 			neighbors.addAll(temp);
 			length++;
 		}
-		return length;
+		
+		setShortestWord(length);
 	}
 	
 	//The language accepted by a DFA is infinite if and only if there exists some cycle on some path from which a final state is reachable.
@@ -231,5 +235,38 @@ public class DFA extends Automaton {
 			}
 		
 		return result;
+	}
+	
+	public void findLongestWord() {
+		if(isInfiniteLanguage())
+			return;
+		// Using BFS traversing the graph of DFA until we end up in final state. 
+		int length=0, maxLength=0;
+		HashSet<State> neighbors = new HashSet<>();
+		neighbors.add(startState);
+		
+		while(neighbors.size()!=0) {
+			if(machineAcceptInput(neighbors)) {
+				if (length>maxLength)
+					maxLength=length;
+			}
+			
+			HashSet<State> temp=new HashSet<>();
+			for (State state : neighbors) {
+				if (state.getAllTransitions().size()==1 && state.getAllTransitions().contains(state))  
+					// This will be the case of dead state. Only the dead state will have autotransitions, because just in case of automata with finite
+					// language only state that will have autotransitions is dead state. Otherwise, that means there would be cycles in the graph and
+					// language would not be finite. 
+					// This is also a condition to break a while loop. 
+					continue;
+				else
+					temp.addAll(state.getAllTransitions());	
+			}
+			neighbors.clear();
+			neighbors.addAll(temp);
+			length++;
+		}
+		
+		setLongestWord(maxLength);
 	}
 }

@@ -1,4 +1,4 @@
-package enfa;
+package automaton;
 
 import java.util.ArrayDeque;
 import java.util.Arrays;
@@ -7,9 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map.Entry;
 
-import automaton.Automaton;
-import dfa.DFA;
-import dfa.State;
+import states.State;
 
 public class ENFA extends Automaton {
 	public static final char epsilon = 'ε';

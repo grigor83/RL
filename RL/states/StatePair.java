@@ -1,4 +1,4 @@
-package dfa;
+package states;
 
 //This class is use for finding and merging equivalent states of DFA
 public class StatePair {

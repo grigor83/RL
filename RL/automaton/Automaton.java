@@ -5,8 +5,7 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashSet;
 
-import dfa.DFA;
-import dfa.State;
+import states.State;
 
 public abstract class Automaton {
 	
@@ -16,7 +15,7 @@ public abstract class Automaton {
 	protected HashSet<State> finalStates;
 	protected ArrayList<Character> alphabet; 
 	private String createdFromRegex;
-	private int shortestWord=-1;
+	private int shortestWord=-1, longestWord=-1;
 	private boolean infiniteLanguage;
 	
 	public Automaton() {
@@ -31,6 +30,14 @@ public abstract class Automaton {
 	
 	public void setShortestWord(int i) {
 		shortestWord=i;
+	}
+	
+	public int getLongestWord() {
+		return longestWord;
+	}
+	
+	public void setLongestWord(int i) {
+		longestWord=i;
 	}
 	
 	public boolean isInfiniteLanguage() {
