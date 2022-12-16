@@ -29,9 +29,8 @@ public class StatePair {
 		if((firstState==otherPair.firstState && secondState==otherPair.secondState) ||
 			(firstState==otherPair.secondState && secondState==otherPair.firstState))
 			return true;
-		else {
+		else
 			return false;
-		}
 	}
 	
 	public int hashCode() {

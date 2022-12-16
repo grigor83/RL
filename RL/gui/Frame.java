@@ -312,7 +312,7 @@ public class Frame extends JFrame {
 		System.out.println();
 	}
 	
-	private void getAllTransitionsForThisSymbol(Automaton automaton, State state, char simbol, String cellValue){
+	public static void getAllTransitionsForThisSymbol(Automaton automaton, State state, char simbol, String cellValue){
 		//U slucaju NFA, polje JTabele ce sadrzati vise stanja pa treba particionisati string cellValue
 		if(cellValue!=null) {
 			String[] statesID=cellValue.split(",");
@@ -364,7 +364,7 @@ public class Frame extends JFrame {
 					". \n Final state(s) of this E-NFA are "+automaton.getFinalStates());
 	}
 	
-	private String getIDfromJTable(JTable table, int row) {
+	public static String getIDfromJTable(JTable table, int row) {
 		String id = (String) table.getValueAt(row, 0);
 		if(id.contains("->"))
 			id=id.split("->")[1];

@@ -70,13 +70,26 @@ public class ENFA extends Automaton {
 	
 	public HashSet<State> epsilonClosure (HashSet<State> currentStates) {
 		// This method will find e-closure for parameter currentStates, and returns e-closure as set. 
-		// Method is using basic transition function deltaFunction, as a helper function.
-		HashSet<State> nextStates = deltaFunction(currentStates, epsilon);
+		// First, we will find epsilon move from current states.
+		HashSet<State> nextStates=new HashSet<>();
+		for (State state : currentStates)
+			if(state.move(ENFA.epsilon)!=null)
+				nextStates.addAll(state.move(ENFA.epsilon));
+		
 		// If there is no epsilon move from currentStates...
 		if(nextStates==null || nextStates.isEmpty() 
 				|| currentStates.containsAll(nextStates)) {	// ...or there is no expansion of the set(no new state in currentStates)
 			return currentStates;						    // it will return the same set.
 		}
+		
+		//For removing recursion,in the case of epsilon move from one state to another and vice versa
+		HashSet<State> temp=new HashSet<>();
+		for (State state : nextStates)
+			if(state.move(ENFA.epsilon)!=null)
+				temp.addAll(state.move(ENFA.epsilon));
+		if(!temp.isEmpty() && currentStates.containsAll(temp))
+			return currentStates;		
+		
 		// Else, again we need to find epsilon closure for each state from next states
 		else {
 			currentStates.addAll(epsilonClosure(nextStates));

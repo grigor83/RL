@@ -170,7 +170,7 @@ public abstract class Automaton {
 				nextStates.addAll(state.move(sign));
 			//In case DFA, nextStates will be always one element and never will be null. 
 			//In case NFA, may be one state, multiple states or null (empty set).
-		if(nextStates.size()==0)
+		if(nextStates.size()==0 || currentStates.containsAll(nextStates))
 			return nextStates;
 		else
 			return epsilonClosure(nextStates);
