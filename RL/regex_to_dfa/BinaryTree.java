@@ -3,7 +3,7 @@ import java.util.HashMap;
 import java.util.Stack;
 
 // I am using method of converting infix expression to postfix for creating binary tree. Leaf nodes will be chars of input string and interior nodes will
-// be operators (*, | or .)
+// be operators *, | or .
 public class BinaryTree {
 	private int numberOfLeafNodes;
 	private String augmentedRegex;

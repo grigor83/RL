@@ -18,17 +18,20 @@ import states.State;
 
 public class RegexToDFA {
 	public static final ArrayList<Character> operators = new ArrayList<>(Arrays.asList('*', '|', '.', '(', ')'));
-    public static Set<Character> alphabet = new HashSet<Character>();
+    public static Set<Character> alphabet;
 	//private static String regex = "(a|b)*abb";   //      (a|b)*abb    aba(a|b)*b*a    (a|b)*|(ac)*
-    private static HashMap<Integer, String> positionOfSymbolInRegex = new HashMap<>();
-	private static ArrayList<State> states = new ArrayList<>();
+    private static HashMap<Integer, String> positionOfSymbolInRegex;
+	private static ArrayList<State> states;
 	private static State startState;
 	private static ArrayList<Set<Integer>> followPos;
 	
 	public static Automaton convert(Automaton automaton, String regex) {
+		alphabet = new HashSet<Character>();
 		alphabet = regex.chars().mapToObj(symbol->(char)symbol).collect(Collectors.toSet());
 	    alphabet.removeAll(operators);
 	    alphabet.add('#');
+	    positionOfSymbolInRegex = new HashMap<>();
+	    states = new ArrayList<>();
 		SyntaxTree st = new SyntaxTree(regex);   			// This will create binary tree and then syntax tree
 		followPos=st.getFollowPos();
 		getPositions(st);
