@@ -15,7 +15,11 @@ import states.StateSet;
 public class DFA extends Automaton {
 		
 	public void minimize() {
-        //First, remove unreachable states
+		// For the minimization of DFA I usec Myhill-Nerode theorem. This method of minimization is also called Table filling method. The time and space 
+		// complexity for creating the fillingTable is O((n^2+n)/2). The rest of the algorithm has the time complexity of O((n^2+n)*k)/2) in one iteration, 
+		//where k is the alphabet size. Max number of iterations in the worst case scenario could be (n^2+n)/2.
+		
+        //First step, remove unreachable states
 		Deque<State> stack = new ArrayDeque<>();
 		HashSet<State> visited = new HashSet<>();
 		stack.push(startState);
@@ -123,7 +127,8 @@ public class DFA extends Automaton {
 	}
 	
 	public void findShortestWord() {
-		// Using BFS traversing the graph of DFA until we end up in final state. 
+		// Using BFS traversing the graph of DFA until we end up in final state. The Time complexity of BFS is O(V + E) when Adjacency List is used 
+		// and O(V^2) when Adjacency Matrix is used, where V stands for vertices and E stands for edges.
 		int length=0;
 		HashSet<State> neighbors = new HashSet<>();
 		neighbors.add(startState);
